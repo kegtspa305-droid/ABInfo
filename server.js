@@ -61,7 +61,9 @@ WILAYAS.forEach(w=>seedRates.run(w.code,0));
 
 app.use(express.json({limit:'5mb'}));
 app.use(express.urlencoded({extended:true}));
-app.use(session({secret:process.env.SESSION_SECRET||'ABINFO_DEV_ONLY_CHANGE_ME_please_use_env',resave:false,saveUninitialized:false,cookie:{httpOnly:true,sameSite:'lax',secure:process.env.NODE_ENV==='production',maxAge:8*60*60*1000}}));
+// Render terminates HTTPS at its reverse proxy. Trust it so secure session cookies work.
+app.set('trust proxy', 1);
+app.use(session({secret:process.env.SESSION_SECRET||'ABINFO_DEV_ONLY_CHANGE_ME_please_use_env',resave:false,saveUninitialized:false,proxy:true,cookie:{httpOnly:true,sameSite:'lax',secure:process.env.NODE_ENV==='production',maxAge:8*60*60*1000}}));
 app.use(express.static(path.join(__dirname,'public')));
 
 const admin=(req,res,next)=>req.session.admin?next():res.status(401).json({error:'Unauthorized'});
